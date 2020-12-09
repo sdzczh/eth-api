@@ -11,6 +11,7 @@ import com.zh.eth.service.ICoinService;
 import com.zh.eth.service.IPayConfigService;
 import com.zh.eth.service.IPayListService;
 import com.zh.eth.service.IUsersService;
+import com.zh.eth.utils.AES;
 import com.zh.eth.utils.HttpUtils;
 import com.zh.eth.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,22 +71,26 @@ public class IndexController {
     }
     @GetMapping("/list")
     @ResponseBody
-    public AjaxResult list(HttpServletRequest request) throws ParseException {
-        Object token1 = request.getHeader("token");
-        String token = token1 == null ? "" : token1.toString();
+    public String list(String address){
         List<Map<String, Object>> list = new LinkedList<>();
-        if(StringUtils.isNotEmpty(token)){
-            Users users = usersService.selectByToken(token);
-            if(users == null){
-                return AjaxResult.error("用户不存在，请重新登录");
+        if(StringUtils.isNotEmpty(address)){
+            try {
+                address =  AES.decrypt(address, "2Tag6A78plkgXy7q");
+            } catch (Exception e) {
+                return  JSONObject.toJSONString("解密失败");
             }
+            if(StringUtils.isEmpty(address) || (address != null ? address.length() : 0) != 42){
+                return JSONObject.toJSONString("解密失败，地址有误");
+            }
+
             PayList payList = new PayList();
-            payList.setUserId(users.getId());
+            payList.setAddress(address);
             List<PayList> payLists = payListService.selectPayListList(payList);
             for (PayList payList1 : payLists) {
                 Map<String, Object> map = new HashMap<>();
                 Coin coin = coinService.selectCoinById(payList1.getToCoin());
-                map.put("amount", payList1.getToAmount().setScale(2, BigDecimal.ROUND_HALF_UP) + " " + coin.getCoinName());
+                map.put("amount", payList1.getToAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
+                map.put("coin", coin.getCoinName());
                 String status;
                 switch (payList1.getStatus()){
                     case 0 : status = "未处理";break;
@@ -98,9 +103,9 @@ public class IndexController {
                 list.add(map);
             }
         }else {
-            return AjaxResult.error("用户登录信息失效，请重新登录");
+            return JSONObject.toJSONString("用户登录信息失效，请重新登录");
         }
-        return AjaxResult.success(list);
+        return JSONObject.toJSONString(list);
     }
 
     /**
@@ -118,7 +123,7 @@ public class IndexController {
      */
     @PostMapping("/commit")
     @ResponseBody
-    public AjaxResult commit(HttpServletRequest request, String address, String amount){
+    public AjaxResult commit(String address, String amount){
         PayConfig payConfig = payConfigService.selectPayConfigById((long) 1);
         if(!com.ruoyi.common.utils.DateUtils.compareDate(com.ruoyi.common.utils.DateUtils.getTime(), payConfig.getStartTime())){
             return AjaxResult.error("认购还没开始");
@@ -126,16 +131,17 @@ public class IndexController {
         if(com.ruoyi.common.utils.DateUtils.compareDate(com.ruoyi.common.utils.DateUtils.getTime(), payConfig.getEndTime())){
             return AjaxResult.error("认购已经结束");
         }
-        Object token1 = request.getHeader("token");
-        String token = token1 == null ? "" : token1.toString();
-        List<Map<String, Object>> list = new LinkedList<>();
-        if(StringUtils.isNotEmpty(token)) {
-            Users users = usersService.selectByToken(token);
-            if (users == null) {
-                return AjaxResult.error("用户不存在，请重新登录");
+        if(StringUtils.isNotEmpty(address)) {
+            try {
+                address =  AES.decrypt(address, "2Tag6A78plkgXy7q");
+            } catch (Exception e) {
+                return  AjaxResult.error("解密失败");
+            }
+            if(StringUtils.isEmpty(address) || (address != null ? address.length() : 0) != 42){
+                return AjaxResult.error("解密失败，地址有误");
             }
             PayList payList = new PayList();
-            payList.setUserId(users.getId());
+            payList.setUserId(1L);
             payList.setAddress(address);
             payList.setAmount(new BigDecimal(amount));
             payList.setCoinId(payConfig.getCoinId());
@@ -155,7 +161,7 @@ public class IndexController {
                 return AjaxResult.error("获取最新ETH价格失败，请稍后重试");
             }
         }else {
-            return AjaxResult.error("用户登录信息失效，请重新登录");
+            return AjaxResult.error("地址不能为空");
         }
     }
 
