@@ -112,10 +112,18 @@ public class IndexController {
      * 获取联系客服二维码
      * @return
      */
-    @GetMapping("/contact")
+    @GetMapping("/status")
     @ResponseBody
-    public AjaxResult contact(){
-        return AjaxResult.success("https://img-blog.csdnimg.cn/20201203184614188.jpg");
+    public String contact(){
+        PayConfig payConfig = payConfigService.selectPayConfigById((long) 1);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("total", payConfig.getTotal().setScale(4, BigDecimal.ROUND_HALF_UP));
+        PayList payList = new PayList();
+        payList.setStatus(1);
+        List<PayList> payLists = payListService.selectPayListList(payList);
+        BigDecimal total = payLists.stream().map(PayList::getToAmount).reduce(BigDecimal.ZERO,BigDecimal::add);
+        jsonObject.put("has", total.setScale(4, BigDecimal.ROUND_HALF_UP));
+        return JSONObject.toJSONString(jsonObject);
     }
     /**
      * 提交认购
@@ -139,6 +147,12 @@ public class IndexController {
             }
             if(StringUtils.isEmpty(address) || (address != null ? address.length() : 0) != 42){
                 return AjaxResult.error("解密失败，地址有误");
+            }
+            PayList payList1 = new PayList();
+            payList1.setAddress(address);
+            List<PayList> payLists = payListService.selectPayListList(payList1);
+            if(payLists != null && payLists.size() != 0){
+                return AjaxResult.error("该地址已参与过");
             }
             PayList payList = new PayList();
             payList.setUserId(1L);
