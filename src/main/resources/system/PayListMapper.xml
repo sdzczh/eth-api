@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zh.eth.mapper.PayListMapper">
+    
+    <resultMap type="PayList" id="PayListResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="coinId"    column="coin_id"    />
+        <result property="address"    column="address"    />
+        <result property="status"    column="status"    />
+        <result property="pId"    column="p_id"    />
+        <result property="amount"    column="amount"    />
+        <result property="toCoin"    column="to_coin"    />
+        <result property="toAmount"    column="to_amount"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectPayListVo">
+        select id, user_id, coin_id, address, status, p_id, amount, to_coin, to_amount, create_time from pay_list
+    </sql>
+
+    <select id="selectPayListList" parameterType="PayList" resultMap="PayListResult">
+        <include refid="selectPayListVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="address != null  and address != ''"> and address = #{address}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectPayListById" parameterType="Long" resultMap="PayListResult">
+        <include refid="selectPayListVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertPayList" parameterType="PayList" useGeneratedKeys="true" keyProperty="id">
+        insert into pay_list
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="coinId != null">coin_id,</if>
+            <if test="address != null and address != ''">address,</if>
+            <if test="status != null">status,</if>
+            <if test="pId != null">p_id,</if>
+            <if test="amount != null">amount,</if>
+            <if test="toCoin != null">to_coin,</if>
+            <if test="toAmount != null">to_amount,</if>
+            <if test="createTime != null and createTime != ''">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="coinId != null">#{coinId},</if>
+            <if test="address != null and address != ''">#{address},</if>
+            <if test="status != null">#{status},</if>
+            <if test="pId != null">#{pId},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="toCoin != null">#{toCoin},</if>
+            <if test="toAmount != null">#{toAmount},</if>
+            <if test="createTime != null and createTime != ''">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePayList" parameterType="PayList">
+        update pay_list
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="coinId != null">coin_id = #{coinId},</if>
+            <if test="address != null and address != ''">address = #{address},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="pId != null">p_id = #{pId},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="toCoin != null">to_coin = #{toCoin},</if>
+            <if test="toAmount != null">to_amount = #{toAmount},</if>
+            <if test="createTime != null and createTime != ''">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePayListById" parameterType="Long">
+        delete from pay_list where id = #{id}
+    </delete>
+
+    <delete id="deletePayListByIds" parameterType="String">
+        delete from pay_list where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

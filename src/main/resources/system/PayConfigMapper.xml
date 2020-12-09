@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zh.eth.mapper.PayConfigMapper">
+    
+    <resultMap type="PayConfig" id="PayConfigResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="coinId"    column="coin_id"    />
+        <result property="toCoin"    column="to_coin"    />
+        <result property="proportion"    column="proportion"    />
+        <result property="total"    column="total"    />
+        <result property="onOff"    column="on_off"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="numbersTime"    column="numbers_time"    />
+        <result property="rules"    column="rules"    />
+        <result property="infos"    column="infos"    />
+    </resultMap>
+
+    <sql id="selectPayConfigVo">
+        select id, name, coin_id, to_coin, proportion, total, on_off, start_time, end_time, numbers_time, rules, infos from pay_config
+    </sql>
+
+    <select id="selectPayConfigList" parameterType="PayConfig" resultMap="PayConfigResult">
+        <include refid="selectPayConfigVo"/>
+        <where>  
+        </where>
+    </select>
+    
+    <select id="selectPayConfigById" parameterType="Long" resultMap="PayConfigResult">
+        <include refid="selectPayConfigVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertPayConfig" parameterType="PayConfig" useGeneratedKeys="true" keyProperty="id">
+        insert into pay_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="coinId != null">coin_id,</if>
+            <if test="toCoin != null">to_coin,</if>
+            <if test="proportion != null">proportion,</if>
+            <if test="total != null">total,</if>
+            <if test="onOff != null">on_off,</if>
+            <if test="startTime != null and startTime != ''">start_time,</if>
+            <if test="endTime != null and endTime != ''">end_time,</if>
+            <if test="numbersTime != null">numbers_time,</if>
+            <if test="rules != null and rules != ''">rules,</if>
+            <if test="infos != null and infos != ''">infos,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="coinId != null">#{coinId},</if>
+            <if test="toCoin != null">#{toCoin},</if>
+            <if test="proportion != null">#{proportion},</if>
+            <if test="total != null">#{total},</if>
+            <if test="onOff != null">#{onOff},</if>
+            <if test="startTime != null and startTime != ''">#{startTime},</if>
+            <if test="endTime != null and endTime != ''">#{endTime},</if>
+            <if test="numbersTime != null">#{numbersTime},</if>
+            <if test="rules != null and rules != ''">#{rules},</if>
+            <if test="infos != null and infos != ''">#{infos},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePayConfig" parameterType="PayConfig">
+        update pay_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="coinId != null">coin_id = #{coinId},</if>
+            <if test="toCoin != null">to_coin = #{toCoin},</if>
+            <if test="proportion != null">proportion = #{proportion},</if>
+            <if test="total != null">total = #{total},</if>
+            <if test="onOff != null">on_off = #{onOff},</if>
+            <if test="startTime != null and startTime != ''">start_time = #{startTime},</if>
+            <if test="endTime != null and endTime != ''">end_time = #{endTime},</if>
+            <if test="numbersTime != null">numbers_time = #{numbersTime},</if>
+            <if test="rules != null and rules != ''">rules = #{rules},</if>
+            <if test="infos != null and infos != ''">infos = #{infos},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePayConfigById" parameterType="Long">
+        delete from pay_config where id = #{id}
+    </delete>
+
+    <delete id="deletePayConfigByIds" parameterType="String">
+        delete from pay_config where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

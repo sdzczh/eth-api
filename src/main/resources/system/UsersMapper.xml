@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zh.eth.mapper.UsersMapper">
+    
+    <resultMap type="Users" id="UsersResult">
+        <result property="id"    column="id"    />
+        <result property="phone"    column="phone"    />
+        <result property="password"    column="password"    />
+        <result property="token"    column="token"    />
+        <result property="uuid"    column="uuid"    />
+        <result property="referId"    column="refer_id"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectUsersVo">
+        select id, phone, password, uuid, token, refer_id, create_time from users
+    </sql>
+
+    <select id="selectUsersList" parameterType="Users" resultMap="UsersResult">
+        <include refid="selectUsersVo"/>
+        <where>  
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="token != null  and token != ''"> and token = #{token}</if>
+            <if test="password != null  and password != ''"> and password = #{password}</if>
+            <if test="uuid != null "> and uuid = #{uuid}</if>
+            <if test="referId != null "> and refer_id = #{referId}</if>
+        </where>
+    </select>
+    
+    <select id="selectUsersById" parameterType="Long" resultMap="UsersResult">
+        <include refid="selectUsersVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertUsers" parameterType="Users" useGeneratedKeys="true" keyProperty="id">
+        insert into users
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="password != null and password != ''">password,</if>
+            <if test="token != null and token != ''">token,</if>
+            <if test="uuid != null">uuid,</if>
+            <if test="referId != null">refer_id,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="password != null and password != ''">#{password},</if>
+            <if test="token != null and token != ''">#{token},</if>
+            <if test="uuid != null">#{uuid},</if>
+            <if test="referId != null">#{referId},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUsers" parameterType="Users">
+        update users
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="token != null and token != ''">token = #{token},</if>
+            <if test="uuid != null">uuid = #{uuid},</if>
+            <if test="referId != null">refer_id = #{referId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteUsersById" parameterType="Long">
+        delete from users where id = #{id}
+    </delete>
+
+    <delete id="deleteUsersByIds" parameterType="String">
+        delete from users where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
